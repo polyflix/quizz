@@ -12,3 +12,12 @@ kafka:
   consumer:
     groupId: todo-consumer
     allowAutoTopicCreation: true
+
+database:
+  psql:
+    host: localhost
+    port: 5433
+    username: sa_quizz
+    password: sa_quizz_pwd
+    database: quizz
+    debug: true

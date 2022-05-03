@@ -5,16 +5,19 @@ stages:
   - package
   - release
   - deploy
-  
+
 include:
-  - project: 'polyflix-do/ci-templates'
-    file: '/templates/nodejs.yml'
+  - project: "polyflix-do/ci-templates"
+    file: "/templates/nodejs.yml"
     ref: main
-  - project: 'polyflix-do/ci-templates'
-    file: '/jobs/nestjs/package.yml'
+  - project: "polyflix-do/ci-templates"
+    file: "/jobs/nestjs/package.migrations.yml"
     ref: main
-  - project: 'polyflix-do/ci-templates'
-    file: '/jobs/nestjs/test.units.yml'
+  - project: "polyflix-do/ci-templates"
+    file: "/jobs/nestjs/package.yml"
+    ref: main
+  - project: "polyflix-do/ci-templates"
+    file: "/jobs/nestjs/test.units.yml"
     ref: main
 
 deploy:kube:
