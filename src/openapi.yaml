@@ -1,0 +1,93 @@
+openapi: 3.1.0
+info:
+  title: Quizz
+  version: '1.0'
+servers:
+  - url: 'http://localhost:3000'
+paths:
+  /api/v1/quizzes:
+    get:
+      summary: Retrieve many quizz
+      tags: []
+      responses: {}
+      operationId: get-api-v1-quizzes
+    post:
+      summary: Create a quizz
+      tags: []
+      responses: {}
+      operationId: post-api-v1-quizzes
+  '/api/v1/quizzes/{id}':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    get:
+      summary: Retrieve one quizz
+      tags: []
+      responses: {}
+      operationId: get-api-v1-quizzes-id
+    put:
+      summary: Replace one quizz
+      tags: []
+      responses: {}
+      operationId: put-api-v1-quizzes-id
+    delete:
+      summary: Delete a quizz
+      tags: []
+      responses: {}
+      operationId: delete-api-v1-quizzes-id
+  '/api/v1/quizzes/{quizzId}/attempts':
+    parameters:
+      - schema:
+          type: string
+        name: quizzId
+        in: path
+        required: true
+    get:
+      summary: Retrieve many quizz attempts
+      tags: []
+      responses: {}
+      operationId: get-api-v1-quizzes-quizzId-attempts
+    post:
+      summary: Create one quizz attempts
+      tags: []
+      responses: {}
+      operationId: post-api-v1-quizzes-quizzId-attempts
+  '/api/v1/quizzes/{quizzId}/attempts/{id}':
+    parameters:
+      - schema:
+          type: string
+        name: quizzId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    get:
+      summary: Retrieve one quizz attempts
+      tags: []
+      responses: {}
+      operationId: get-api-v1-quizzes-quizzId-attempts-id
+  '/api/v1/quizzes/{quizzId}/attempts?user={userId}':
+    parameters:
+      - schema:
+          type: string
+        name: quizzId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: userId
+        in: path
+        required: true
+    get:
+      summary: Retrieve quizz attempts for a user
+      tags: []
+      responses: {}
+      operationId: get-api-v1-quizzes-quizzId-attempts?user=-userId
+components:
+  schemas: {}
