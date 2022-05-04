@@ -4,7 +4,7 @@ import { Column, Entity, OneToMany } from "typeorm";
 import { DefaultEntity } from "./default.entity";
 import { QuestionEntity } from "./question.entity";
 
-@Entity()
+@Entity("quizz")
 export class QuizzEntity extends DefaultEntity {
   @Column()
   name: string;

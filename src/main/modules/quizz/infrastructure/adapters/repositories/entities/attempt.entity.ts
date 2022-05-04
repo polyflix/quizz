@@ -6,7 +6,7 @@ export interface QuizzAnswersEntity {
   [questionId: string]: string[];
 }
 
-@Entity()
+@Entity("attempt")
 export class AttemptEntity extends DefaultEntity {
   @Column({ type: "float" })
   score: number;

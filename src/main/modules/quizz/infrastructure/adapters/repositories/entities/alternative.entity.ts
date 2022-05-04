@@ -3,7 +3,7 @@ import { Column, Entity, ManyToOne } from "typeorm";
 import { DefaultEntity } from "./default.entity";
 import { QuestionEntity } from "./question.entity";
 
-@Entity()
+@Entity("alternative")
 export class AlternativeEntity extends DefaultEntity {
   @IsString()
   @Column()

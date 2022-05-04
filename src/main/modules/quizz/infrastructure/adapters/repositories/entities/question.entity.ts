@@ -13,7 +13,7 @@ import { AlternativeEntity } from "./alternative.entity";
 import { DefaultEntity } from "./default.entity";
 import { QuizzEntity } from "./quizz.entity";
 
-@Entity()
+@Entity("question")
 export class QuestionEntity extends DefaultEntity {
   @IsInt()
   @Min(0)
