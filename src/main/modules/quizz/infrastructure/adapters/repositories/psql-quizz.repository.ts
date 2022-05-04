@@ -6,13 +6,16 @@ import { QuizzRepository } from "../../../domain/ports/repositories/quiz.reposit
 import { Option, Result } from "@swan-io/boxed";
 import { QuizzEntity } from "./entities/quizz.entity";
 import { QuizzEntityMapper } from "../mappers/quizz.mapper";
+import { QuizzFilter } from "../filters/quizz.filter";
+import { DefaultQuizzParams, QuizzParams } from "../params/quizz.param";
 
 @Injectable()
 export class InPostgresQuizzRepository extends QuizzRepository {
   constructor(
     @InjectRepository(Quizz)
     private readonly quizzRepository: Repository<QuizzEntity>,
-    private readonly quizzEntityMapper: QuizzEntityMapper
+    private readonly quizzEntityMapper: QuizzEntityMapper,
+    private readonly quizzFilter: QuizzFilter
   ) {
     super();
   }
@@ -32,11 +35,14 @@ export class InPostgresQuizzRepository extends QuizzRepository {
    * Find all quizz
    * @returns all the quizz
    */
-  // TODO: add pagination
-  async findAll(): Promise<Quizz[]> {
-    return this.quizzEntityMapper.entitiesToApis(
-      await this.quizzRepository.find()
-    );
+  async findAll(params: QuizzParams = DefaultQuizzParams): Promise<Quizz[]> {
+    const queryBuilder = this.quizzRepository.createQueryBuilder("quizz");
+    this.quizzFilter.buildFilters(queryBuilder, params);
+    this.quizzFilter.buildPaginationAndSort(queryBuilder, params);
+
+    const result = await queryBuilder.getMany();
+
+    return this.quizzEntityMapper.entitiesToApis(result);
   }
 
   /**

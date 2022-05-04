@@ -6,13 +6,16 @@ import { AttemptRepository } from "../../../domain/ports/repositories/attempt.re
 import { Attempt } from "../../../domain/entities/attempt.entity";
 import { AttemptEntityMapper } from "../mappers/attempt.mapper";
 import { AttemptEntity } from "./entities/attempt.entity";
+import { AttemptFilter } from "../filters/attempt.filter";
+import { AttemptParams, DefaultAttemptParams } from "../params/attempt.param";
 
 @Injectable()
 export class InPostgresAttemptRepository extends AttemptRepository {
   constructor(
     @InjectRepository(Attempt)
     readonly AttemptRepository: Repository<AttemptEntity>,
-    private readonly attemptEntityMapper: AttemptEntityMapper
+    private readonly attemptEntityMapper: AttemptEntityMapper,
+    private readonly attemptFilter: AttemptFilter
   ) {
     super();
   }
@@ -34,11 +37,16 @@ export class InPostgresAttemptRepository extends AttemptRepository {
    * Find all Attempt
    * @returns all the Attempt
    */
-  // TODO: add pagination
-  async findAll(): Promise<Attempt[]> {
-    return this.attemptEntityMapper.entitiesToApis(
-      await this.AttemptRepository.find()
-    );
+  async findAll(
+    params: AttemptParams = DefaultAttemptParams
+  ): Promise<Attempt[]> {
+    const queryBuilder = this.AttemptRepository.createQueryBuilder("quizz");
+    this.attemptFilter.buildFilters(queryBuilder, params);
+    this.attemptFilter.buildPaginationAndSort(queryBuilder, params);
+
+    const result = await queryBuilder.getMany();
+
+    return this.attemptEntityMapper.entitiesToApis(result);
   }
 
   /**

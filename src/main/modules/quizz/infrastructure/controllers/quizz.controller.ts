@@ -5,12 +5,14 @@ import {
   Get,
   Param,
   Post,
-  Put
+  Put,
+  Query
 } from "@nestjs/common";
 import {
   CreateQuizzDTO,
   UpdateQuizzDTO
 } from "../../application/dto/quizz.dto";
+import { QuizzParams } from "../adapters/params/quizz.param";
 import { QuizzService } from "../services/quizz.service";
 
 @Controller("quizzes")
@@ -18,8 +20,8 @@ export class QuizzController {
   constructor(private readonly quizzService: QuizzService) {}
 
   @Get()
-  find() {
-    return this.quizzService.find();
+  find(@Query() query: QuizzParams) {
+    return this.quizzService.find(query);
   }
 
   @Get(":id")
