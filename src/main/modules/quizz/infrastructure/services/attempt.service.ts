@@ -7,6 +7,10 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { CreateAttemptDto } from "../../application/dto/create-attempt.dto";
 import { Attempt } from "../../domain/entities/attempt.entity";
 import { AttemptRepository } from "../../domain/ports/repositories/attempt.repository";
+import {
+  AttemptParams,
+  DefaultAttemptParams
+} from "../adapters/params/attempt.param";
 import { QuizzService } from "./quizz.service";
 
 @Injectable()
@@ -34,27 +38,13 @@ export class AttemptService {
   }
 
   /**
-   * Find all attempts for a specific user
-   * @param userId id of the wanted user
-   * @returns all the attempts of the user
-   */
-  //TODO: add pagination
-  async findByUserId(userId: string): Promise<Attempt[]> {
-    // FIXME: add options filter
-    const attempts = await this.attemptRepository.findAll();
-
-    return attempts.filter((attempt) => attempt.userId === userId);
-  }
-
-  /**
    * Find all attempts for all users
    * @returns all the attempts
    */
-  // TODO: add pagination
-  async find(quizzId: string): Promise<Attempt[]> {
-    const attempts = await this.attemptRepository.findAll();
+  async find(params: AttemptParams = DefaultAttemptParams): Promise<Attempt[]> {
+    const attempts = await this.attemptRepository.findAll(params);
 
-    return attempts.filter((attempt) => attempt.quizzId === quizzId);
+    return attempts;
   }
 
   /**

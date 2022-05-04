@@ -1,7 +1,6 @@
 import { Exclude } from "class-transformer";
-import { Column, Entity, ManyToOne } from "typeorm";
+import { Column, Entity } from "typeorm";
 import { DefaultEntity } from "./default.entity";
-import { QuizzEntity } from "./quizz.entity";
 
 export interface QuizzAnswersEntity {
   [questionId: string]: string[];

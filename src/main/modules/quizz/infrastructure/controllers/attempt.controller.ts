@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Param, Post, Query } from "@nestjs/common";
 import { CreateAttemptDto } from "../../application/dto/create-attempt.dto";
+import { AttemptParams } from "../adapters/params/attempt.param";
 import { AttemptService } from "../services/attempt.service";
 
 @Controller("quizzes/:quizzId/attempts")
@@ -7,13 +8,9 @@ export class AttemptController {
   constructor(private readonly attemptService: AttemptService) {}
 
   @Get()
-  find(@Param("quizzId") quizzId: string, @Query("userId") userId: string) {
+  find(@Param("quizzId") quizzId: string, @Query() query: AttemptParams) {
     // Return only attempts of the specified user
-    if (userId) {
-      return this.attemptService.findByUserId(userId);
-    }
-
-    return this.attemptService.find(quizzId);
+    return this.attemptService.find({ quizzId, ...query });
   }
 
   @Get(":id")

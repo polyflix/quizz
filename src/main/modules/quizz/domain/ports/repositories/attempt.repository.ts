@@ -1,8 +1,9 @@
 import { Option, Result } from "@swan-io/boxed";
+import { AttemptParams } from "../../../infrastructure/adapters/params/attempt.param";
 import { Attempt } from "../../entities/attempt.entity";
 
 export abstract class AttemptRepository {
-  abstract findAll(): Promise<Attempt[]>;
+  abstract findAll(params: AttemptParams): Promise<Attempt[]>;
   abstract findOne(id: string): Promise<Option<Attempt>>;
   abstract save(attempt: Attempt): Promise<Result<Attempt, Error>>;
 }

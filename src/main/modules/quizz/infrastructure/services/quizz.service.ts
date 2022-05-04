@@ -11,6 +11,10 @@ import {
 } from "../../application/dto/quizz.dto";
 import { QuizzAnswers } from "../../domain/entities/attempt.entity";
 import { Quizz } from "../../domain/entities/quizz.entity";
+import {
+  DefaultQuizzParams,
+  QuizzParams
+} from "../adapters/params/quizz.param";
 import { InPostgresQuizzRepository } from "../adapters/repositories/psql-quizz.repository";
 
 @Injectable()
@@ -39,9 +43,8 @@ export class QuizzService {
    * Find all quizz
    * @returns all the quizz
    */
-  // TODO: add pagination
-  async find(): Promise<Quizz[]> {
-    return this.quizzRepository.findAll();
+  async find(params: QuizzParams = DefaultQuizzParams): Promise<Quizz[]> {
+    return this.quizzRepository.findAll(params);
   }
 
   /**
