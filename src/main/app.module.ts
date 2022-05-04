@@ -4,7 +4,7 @@ import { OpenTelemetryModule } from "nestjs-otel";
 import { AppService } from "./app.service";
 import { HealthModule } from "./core/health/health.module";
 import { KafkaModule } from "./core/kafka/kafka.module";
-import { TodoModule } from "./modules/todo/infrastructure/todo.module";
+import { QuizzModule } from "./modules/quizz/infrastructure/quizz.module";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { configureTypeORM } from "./config/database.config";
 
@@ -20,7 +20,7 @@ export class AppModule {
       imports: [
         KafkaModule,
         HealthModule,
-        TodoModule,
+        QuizzModule,
         OpenTelemetryModule.forRoot(),
         ConfigModule.forRoot({
           isGlobal: true,

@@ -1,4 +1,4 @@
-# NestJS Microservice boilerplate
+# NestJS Microservice quizz
 
 ## Getting started
 
