@@ -71,12 +71,14 @@ export class AttemptService {
     const quizz = await this.quizzService.findOne(quizzId);
     const score = this.quizzService.computeScore(quizz, dto.answers);
 
-    const attempt = await this.attemptRepository.save({
-      userId,
-      quizzId,
-      score,
-      ...dto
-    });
+    const attempt = await this.attemptRepository.save(
+      Attempt.create({
+        userId,
+        quizzId,
+        score,
+        ...dto
+      })
+    );
 
     return attempt.match({
       Ok: (value: Attempt) => value,

@@ -4,11 +4,15 @@ import { Repository } from "typeorm";
 import { Option, Result } from "@swan-io/boxed";
 import { AttemptRepository } from "../../../domain/ports/repositories/attempt.repository";
 import { Attempt } from "../../../domain/entities/attempt.entity";
+import { AttemptEntityMapper } from "../mappers/attempt.mapper";
+import { AttemptEntity } from "./entities/attempt.entity";
 
 @Injectable()
 export class InPostgresAttemptRepository extends AttemptRepository {
   constructor(
-    @InjectRepository(Attempt) readonly AttemptRepository: Repository<Attempt>
+    @InjectRepository(Attempt)
+    readonly AttemptRepository: Repository<AttemptEntity>,
+    private readonly attemptEntityMapper: AttemptEntityMapper
   ) {
     super();
   }
@@ -19,7 +23,11 @@ export class InPostgresAttemptRepository extends AttemptRepository {
    * @returns the focused Attempt
    */
   async findOne(id: string): Promise<Option<Attempt>> {
-    return Option.fromNullable(await this.AttemptRepository.findOne(id));
+    return Option.fromNullable<Attempt>(
+      this.attemptEntityMapper.entityToApi(
+        await this.AttemptRepository.findOne(id)
+      )
+    );
   }
 
   /**
@@ -28,7 +36,9 @@ export class InPostgresAttemptRepository extends AttemptRepository {
    */
   // TODO: add pagination
   async findAll(): Promise<Attempt[]> {
-    return this.AttemptRepository.find();
+    return this.attemptEntityMapper.entitiesToApis(
+      await this.AttemptRepository.find()
+    );
   }
 
   /**
@@ -38,6 +48,12 @@ export class InPostgresAttemptRepository extends AttemptRepository {
    * @returns the fresh entity
    */
   async save(Attempt: Attempt): Promise<Result<Attempt, Error>> {
-    return Result.fromPromise(this.AttemptRepository.save(Attempt));
+    return Result.Ok(
+      this.attemptEntityMapper.entityToApi(
+        await this.AttemptRepository.save(
+          this.attemptEntityMapper.apiToEntity(Attempt)
+        )
+      )
+    );
   }
 }
