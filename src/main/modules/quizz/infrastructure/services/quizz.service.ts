@@ -51,10 +51,12 @@ export class QuizzService {
    * @returns the fresh entity
    */
   async create(dto: CreateQuizzDTO, userId: string): Promise<Quizz> {
-    const quizz = await this.quizzRepository.save({
-      userId,
-      ...dto
-    });
+    const quizz = await this.quizzRepository.save(
+      Quizz.create({
+        userId,
+        ...dto
+      })
+    );
 
     return quizz.match({
       Ok: (value: Quizz) => value,
@@ -82,7 +84,9 @@ export class QuizzService {
       throw new UnauthorizedException("You are not the owner of this quizz");
     }
 
-    const quizz = await this.quizzRepository.save({ id, userId, ...dto });
+    const quizz = await this.quizzRepository.save(
+      Quizz.create({ id, userId, ...dto })
+    );
 
     return quizz.match({
       Ok: (value: Quizz) => value,

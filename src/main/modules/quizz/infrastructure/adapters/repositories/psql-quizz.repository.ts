@@ -4,11 +4,15 @@ import { Repository } from "typeorm";
 import { Quizz } from "../../../domain/entities/quizz.entity";
 import { QuizzRepository } from "../../../domain/ports/repositories/quiz.repository";
 import { Option, Result } from "@swan-io/boxed";
+import { QuizzEntity } from "./entities/quizz.entity";
+import { QuizzEntityMapper } from "../mappers/quizz.mapper";
 
 @Injectable()
 export class InPostgresQuizzRepository extends QuizzRepository {
   constructor(
-    @InjectRepository(Quizz) readonly quizzRepository: Repository<Quizz>
+    @InjectRepository(Quizz)
+    private readonly quizzRepository: Repository<QuizzEntity>,
+    private readonly quizzEntityMapper: QuizzEntityMapper
   ) {
     super();
   }
@@ -19,7 +23,9 @@ export class InPostgresQuizzRepository extends QuizzRepository {
    * @returns the focused quizz
    */
   async findOne(id: string): Promise<Option<Quizz>> {
-    return Option.fromNullable(await this.quizzRepository.findOne(id));
+    return Option.fromNullable<Quizz>(
+      this.quizzEntityMapper.entityToApi(await this.quizzRepository.findOne(id))
+    );
   }
 
   /**
@@ -28,7 +34,9 @@ export class InPostgresQuizzRepository extends QuizzRepository {
    */
   // TODO: add pagination
   async findAll(): Promise<Quizz[]> {
-    return this.quizzRepository.find();
+    return this.quizzEntityMapper.entitiesToApis(
+      await this.quizzRepository.find()
+    );
   }
 
   /**
@@ -38,7 +46,13 @@ export class InPostgresQuizzRepository extends QuizzRepository {
    * @returns the fresh entity
    */
   async save(quizz: Quizz): Promise<Result<Quizz, Error>> {
-    return Result.fromPromise(this.quizzRepository.save(quizz));
+    return Result.Ok(
+      this.quizzEntityMapper.entityToApi(
+        await this.quizzRepository.save(
+          this.quizzEntityMapper.apiToEntity(quizz)
+        )
+      )
+    );
   }
 
   /**
