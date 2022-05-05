@@ -10,9 +10,9 @@ import { QuizzFilter } from "../filters/quizz.filter";
 import { DefaultQuizzParams, QuizzParams } from "../params/quizz.param";
 
 @Injectable()
-export class InPostgresQuizzRepository extends QuizzRepository {
+export class PsqlQuizzRepository extends QuizzRepository {
   constructor(
-    @InjectRepository(Quizz)
+    @InjectRepository(QuizzEntity)
     private readonly quizzRepository: Repository<QuizzEntity>,
     private readonly quizzEntityMapper: QuizzEntityMapper,
     private readonly quizzFilter: QuizzFilter

@@ -4,7 +4,6 @@ import {
   UnauthorizedException,
   UnprocessableEntityException
 } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
 import {
   CreateQuizzDTO,
   UpdateQuizzDTO
@@ -15,13 +14,11 @@ import {
   DefaultQuizzParams,
   QuizzParams
 } from "../adapters/params/quizz.param";
-import { InPostgresQuizzRepository } from "../adapters/repositories/psql-quizz.repository";
+import { PsqlQuizzRepository } from "../adapters/repositories/psql-quizz.repository";
 
 @Injectable()
 export class QuizzService {
-  constructor(
-    @InjectRepository(Quizz) readonly quizzRepository: InPostgresQuizzRepository
-  ) {}
+  constructor(readonly quizzRepository: PsqlQuizzRepository) {}
 
   /**
    * Find a specific Quizz
@@ -30,7 +27,6 @@ export class QuizzService {
    */
   async findOne(id: string): Promise<Quizz> {
     const quizz = await this.quizzRepository.findOne(id);
-
     return quizz.match({
       Some: (value: Quizz) => value,
       None: () => {

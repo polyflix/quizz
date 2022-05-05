@@ -10,9 +10,9 @@ import { AttemptFilter } from "../filters/attempt.filter";
 import { AttemptParams, DefaultAttemptParams } from "../params/attempt.param";
 
 @Injectable()
-export class InPostgresAttemptRepository extends AttemptRepository {
+export class PsqlAttemptRepository extends AttemptRepository {
   constructor(
-    @InjectRepository(Attempt)
+    @InjectRepository(AttemptEntity)
     readonly AttemptRepository: Repository<AttemptEntity>,
     private readonly attemptEntityMapper: AttemptEntityMapper,
     private readonly attemptFilter: AttemptFilter

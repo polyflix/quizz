@@ -6,7 +6,7 @@ import {
 import { InjectRepository } from "@nestjs/typeorm";
 import { CreateAttemptDto } from "../../application/dto/create-attempt.dto";
 import { Attempt } from "../../domain/entities/attempt.entity";
-import { AttemptRepository } from "../../domain/ports/repositories/attempt.repository";
+import { PsqlAttemptRepository } from "../adapters/repositories/psql-attempt.repository";
 import {
   AttemptParams,
   DefaultAttemptParams
@@ -16,8 +16,7 @@ import { QuizzService } from "./quizz.service";
 @Injectable()
 export class AttemptService {
   constructor(
-    @InjectRepository(Attempt)
-    readonly attemptRepository: AttemptRepository,
+    readonly attemptRepository: PsqlAttemptRepository,
     readonly quizzService: QuizzService
   ) {}
 
