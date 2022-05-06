@@ -26,4 +26,9 @@ export class QuizzEntity extends DefaultEntity {
 
   @Column()
   userId: string;
+
+  @Column({ default: false })
+  @IsBoolean({ always: true })
+  @IsOptional({ always: true })
+  draft: boolean;
 }

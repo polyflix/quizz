@@ -15,6 +15,10 @@ export class CreateQuizzDTO {
 
   @Type(() => Question)
   questions: Question[];
+
+  @IsBoolean({ always: true })
+  @IsOptional({ always: true })
+  draft: boolean;
 }
 
 export class UpdateQuizzDTO extends CreateQuizzDTO {}

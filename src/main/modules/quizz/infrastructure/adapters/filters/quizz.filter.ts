@@ -21,6 +21,12 @@ export class QuizzFilter extends AbstractFilter<QuizzEntity> {
       });
     }
 
+    if (has(params, "draft")) {
+      queryBuilder.andWhere("quizz.draft = :draft", {
+        draft: params.draft
+      });
+    }
+
     // if (has(params, "visibility")) {
     //   queryBuilder.andWhere("quizz.visibility = :visibility", {
     //     visibility

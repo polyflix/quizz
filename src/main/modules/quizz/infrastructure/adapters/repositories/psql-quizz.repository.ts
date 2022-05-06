@@ -8,6 +8,8 @@ import { QuizzEntity } from "./entities/quizz.entity";
 import { QuizzEntityMapper } from "../mappers/quizz.mapper";
 import { QuizzFilter } from "../filters/quizz.filter";
 import { DefaultQuizzParams, QuizzParams } from "../params/quizz.param";
+import { QuestionEntity } from "./entities/question.entity";
+import { AlternativeEntity } from "./entities/alternative.entity";
 
 @Injectable()
 export class PsqlQuizzRepository extends QuizzRepository {
@@ -26,8 +28,24 @@ export class PsqlQuizzRepository extends QuizzRepository {
    * @returns the focused quizz
    */
   async findOne(id: string): Promise<Option<Quizz>> {
+    const quizz = await this.quizzRepository
+      .createQueryBuilder("quizz")
+      .innerJoinAndMapMany(
+        "quizz.question",
+        QuestionEntity,
+        "question",
+        "quizz.id = question.quizzId"
+      )
+      .innerJoinAndMapMany(
+        "question.alternatives",
+        AlternativeEntity,
+        "alternatives",
+        "question.id = alternatives.questionId"
+      )
+      .where("quizz.id = :id", { id }) // or you can change condition to 'key.userId = :userId' because of you have `userId` in Key
+      .getOne();
     return Option.fromNullable<Quizz>(
-      this.quizzEntityMapper.entityToApi(await this.quizzRepository.findOne(id))
+      this.quizzEntityMapper.entityToApi(quizz)
     );
   }
 

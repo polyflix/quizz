@@ -9,6 +9,7 @@ export class QuizzProps extends Default {
   allowedRetries: number;
   questions: Question[];
   userId: string;
+  draft: boolean;
 }
 
 export class Quizz {
@@ -18,6 +19,7 @@ export class Quizz {
     public allowedRetries: number,
     public questions: Question[],
     public userId: string,
+    public draft: boolean = false,
     public id?: string
   ) {}
 
@@ -27,7 +29,8 @@ export class Quizz {
       props.keepHighestScore,
       props.allowedRetries,
       props.questions,
-      props.userId
+      props.userId,
+      props.draft
     );
 
     return quizz.validate().match({
