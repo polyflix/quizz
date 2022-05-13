@@ -14,8 +14,6 @@ import {
  */
 @Controller("health")
 export class HealthController {
-  private readonly logger = new Logger(HealthController.name);
-
   constructor(
     private health: HealthCheckService,
     private httpIndicator: HttpHealthIndicator,
@@ -25,7 +23,6 @@ export class HealthController {
   @Get()
   @HealthCheck()
   check() {
-    this.logger.log(`Check my service health`);
     const serviceEndpoint: string = this.configService.get<string>(
       "service.to.check.endpoint"
     );
