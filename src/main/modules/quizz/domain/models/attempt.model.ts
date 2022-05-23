@@ -1,10 +1,7 @@
 import { Result } from "@swan-io/boxed";
 import { AttemptInvalidError } from "../errors/attempt-invalid.error";
 import { Default } from "./default.model";
-<<<<<<< HEAD:src/main/modules/quizz/domain/models/attempt.model.ts
 import { User } from "./user.model";
-=======
->>>>>>> 734dbbc (refactor(quizz): fixed integration issues with frontend):src/main/modules/quizz/domain/entities/attempt.entity.ts
 
 export interface QuizzAnswers {
   [questionId: string]: string[];
