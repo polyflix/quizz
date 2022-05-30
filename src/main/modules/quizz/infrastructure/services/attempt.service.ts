@@ -1,17 +1,18 @@
 import {
   Injectable,
   NotFoundException,
+  UnauthorizedException,
   UnprocessableEntityException
 } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { CreateAttemptDto } from "../../application/dto/create-attempt.dto";
-import { Attempt } from "../../domain/entities/attempt.entity";
+import { CreateAttemptDto } from "../../application/dto/attempt.dto";
+import { Attempt } from "../../domain/models/attempt.model";
 import { PsqlAttemptRepository } from "../adapters/repositories/psql-attempt.repository";
 import {
   AttemptParams,
   DefaultAttemptParams
 } from "../adapters/params/attempt.param";
 import { QuizzService } from "./quizz.service";
+import { AttemptResponse } from "../../domain/responses/attempt.response";
 
 @Injectable()
 export class AttemptService {
@@ -40,10 +41,23 @@ export class AttemptService {
    * Find all attempts for all users
    * @returns all the attempts
    */
-  async find(params: AttemptParams = DefaultAttemptParams): Promise<Attempt[]> {
-    const attempts = await this.attemptRepository.findAll(params);
+  async find(
+    params: AttemptParams = DefaultAttemptParams
+  ): Promise<AttemptResponse> {
+    const quizz = await this.quizzService.findOne(params.quizzId, false);
+    if (!quizz) {
+      throw new NotFoundException("Quizz not found");
+    }
 
-    return attempts;
+    const attempts = await this.attemptRepository.findAll(params);
+    const totalAttempts = await this.attemptRepository.count(params);
+    return {
+      count: attempts.length,
+      data: attempts,
+      total: totalAttempts,
+      pageCount: Math.ceil(totalAttempts / (params.pageSize || 10)),
+      page: params.page || 1
+    };
   }
 
   /**
@@ -57,12 +71,18 @@ export class AttemptService {
     quizzId: string,
     userId: string
   ): Promise<Attempt> {
-    const quizz = await this.quizzService.findOne(quizzId);
+    const quizz = await this.quizzService.findOne(quizzId, true);
+
+    if (dto.user.id !== userId) {
+      return Promise.reject(
+        new UnauthorizedException("User ID provided don't match your user ID")
+      );
+    }
+
     const score = this.quizzService.computeScore(quizz, dto.answers);
 
     const attempt = await this.attemptRepository.save(
       Attempt.create({
-        userId,
         quizzId,
         score,
         ...dto

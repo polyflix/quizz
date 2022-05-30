@@ -1,6 +1,7 @@
 import { Result } from "@swan-io/boxed";
 import { AttemptInvalidError } from "../errors/attempt-invalid.error";
-import { Default } from "./default.entity";
+import { Default } from "./default.model";
+import { User } from "./user.model";
 
 export interface QuizzAnswers {
   [questionId: string]: string[];
@@ -8,7 +9,7 @@ export interface QuizzAnswers {
 export class AttemptProps extends Default {
   score: number;
   answers: QuizzAnswers;
-  userId: string;
+  user: User;
   quizzId: string;
 }
 
@@ -16,7 +17,7 @@ export class Attempt {
   private constructor(
     public score: number,
     public answers: QuizzAnswers,
-    public userId: string,
+    public user: User,
     public quizzId: string,
     public id?: string
   ) {}
@@ -25,7 +26,7 @@ export class Attempt {
     const attempt = new Attempt(
       props.score,
       props.answers,
-      props.userId,
+      props.user,
       props.quizzId
     );
 

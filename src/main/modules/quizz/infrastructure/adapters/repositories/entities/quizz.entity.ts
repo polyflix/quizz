@@ -1,5 +1,5 @@
 import { Type } from "class-transformer";
-import { IsBoolean, IsOptional } from "class-validator";
+import { IsBoolean, IsOptional, IsString } from "class-validator";
 import { Column, Entity, OneToMany } from "typeorm";
 import { DefaultEntity } from "./default.entity";
 import { QuestionEntity } from "./question.entity";
@@ -24,11 +24,24 @@ export class QuizzEntity extends DefaultEntity {
   @Type(() => QuestionEntity)
   questions: QuestionEntity[];
 
-  @Column()
-  userId: string;
-
   @Column({ default: false })
   @IsBoolean({ always: true })
   @IsOptional({ always: true })
   draft: boolean;
+
+  @IsString()
+  @Column()
+  user_id: string;
+
+  @IsString()
+  @Column()
+  user_firstName: string;
+
+  @IsString()
+  @Column()
+  user_lastName: string;
+
+  @IsString()
+  @Column()
+  user_avatar: string;
 }

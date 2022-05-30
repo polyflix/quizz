@@ -8,8 +8,9 @@ import {
   CreateQuizzDTO,
   UpdateQuizzDTO
 } from "../../application/dto/quizz.dto";
-import { QuizzAnswers } from "../../domain/entities/attempt.entity";
-import { Quizz } from "../../domain/entities/quizz.entity";
+import { QuizzAnswers } from "../../domain/models/attempt.model";
+import { Quizz } from "../../domain/models/quizz.model";
+import { QuizzResponse } from "../../domain/responses/quizz.response";
 import {
   DefaultQuizzParams,
   QuizzParams
@@ -25,10 +26,10 @@ export class QuizzService {
    * @param id id of the quizz asked
    * @returns the focused quizz
    */
-  async findOne(id: string): Promise<Quizz> {
+  async findOne(id: string, solved = false): Promise<Quizz> {
     const quizz = await this.quizzRepository.findOne(id);
     return quizz.match({
-      Some: (value: Quizz) => value,
+      Some: (value: Quizz) => (solved ? value : this.removeSolutions(value)),
       None: () => {
         throw new NotFoundException("Quizz not found");
       }
@@ -39,8 +40,16 @@ export class QuizzService {
    * Find all quizz
    * @returns all the quizz
    */
-  async find(params: QuizzParams = DefaultQuizzParams): Promise<Quizz[]> {
-    return this.quizzRepository.findAll(params);
+  async find(params: QuizzParams = DefaultQuizzParams): Promise<QuizzResponse> {
+    const quizzes = await this.quizzRepository.findAll(params);
+    const totalQuizzes = await this.quizzRepository.count(params);
+    return {
+      count: quizzes.length,
+      data: quizzes,
+      total: totalQuizzes,
+      pageCount: Math.ceil(totalQuizzes / (params.pageSize || 10)),
+      page: params.page || 1
+    };
   }
 
   /**
@@ -50,12 +59,13 @@ export class QuizzService {
    * @returns the fresh entity
    */
   async create(dto: CreateQuizzDTO, userId: string): Promise<Quizz> {
-    const quizz = await this.quizzRepository.save(
-      Quizz.create({
-        userId,
-        ...dto
-      })
-    );
+    if (dto.user.id !== userId) {
+      return Promise.reject(
+        new UnauthorizedException("User ID provided don't match your user ID")
+      );
+    }
+
+    const quizz = await this.quizzRepository.save(Quizz.create(dto));
 
     return quizz.match({
       Ok: (value: Quizz) => value,
@@ -79,14 +89,15 @@ export class QuizzService {
   ): Promise<Quizz> {
     // Get the entity and check if the user is the creator of the resource
     const focusedQuizz = await this.quizzRepository.findOne(id);
-    if (focusedQuizz.isSome() && focusedQuizz.value.userId !== userId) {
-      throw new UnauthorizedException("You are not the owner of this quizz");
+    if (focusedQuizz.isSome() && focusedQuizz.value.user.id !== userId) {
+      return Promise.reject(
+        new UnauthorizedException("You are not the owner of this quizz")
+      );
     }
 
     const quizz = await this.quizzRepository.save(
-      Quizz.create({ id, userId, ...dto })
+      Quizz.create({ id, ...focusedQuizz.value, ...dto })
     );
-
     return quizz.match({
       Ok: (value: Quizz) => value,
       Error: () => {
@@ -103,11 +114,35 @@ export class QuizzService {
    */
   async delete(id: string, userId: string) {
     // Get the entity and check if the user is the creator of the resource
-    const focusedQuizz = await this.quizzRepository.findOne(id);
-    if (focusedQuizz.isSome() && focusedQuizz.value.userId !== userId) {
-      throw new UnauthorizedException("You are not the owner of this quizz");
+    let focusedQuizz;
+    try {
+      focusedQuizz = await this.quizzRepository.findOne(id);
+    } catch {
+      return new UnprocessableEntityException();
     }
-    return this.quizzRepository.remove(id);
+
+    if (focusedQuizz.isSome() && focusedQuizz.value.user.id !== userId) {
+      return Promise.reject(
+        new UnauthorizedException("You are not the owner of this quizz")
+      );
+    }
+
+    const response = this.quizzRepository.remove(id);
+    return { response: { statusCode: response.tag } };
+  }
+
+  /**
+   *  Remove quizz questions solutions
+   * @param quizz
+   * @returns quizz
+   */
+  removeSolutions(quizz: Quizz): Quizz {
+    quizz.data.questions.forEach((question) => {
+      question.alternatives.forEach((alternative) => {
+        delete alternative.isCorrect;
+      });
+    });
+    return quizz;
   }
 
   /**
@@ -117,8 +152,12 @@ export class QuizzService {
     let score = 0;
     let malus = 0;
 
+    quizz.data.questions.forEach((q) => console.log(q));
+
     Object.entries(answers).forEach(([questionId, questionAnswers]) => {
-      const { alternatives } = quizz.questions.find((q) => q.id === questionId);
+      const { alternatives } = quizz.data.questions.find(
+        (q) => q.id === questionId
+      );
       // The total correct alternatives for the question
       const totalGoodAlt = alternatives.filter(
         ({ isCorrect }) => isCorrect
