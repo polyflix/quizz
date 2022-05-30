@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import { Quizz } from "../../../domain/entities/quizz.entity";
+import { Quizz } from "../../../domain/models/quizz.model";
 import { QuizzRepository } from "../../../domain/ports/repositories/quiz.repository";
 import { Option, Result } from "@swan-io/boxed";
 import { QuizzEntity } from "./entities/quizz.entity";
@@ -30,23 +30,23 @@ export class PsqlQuizzRepository extends QuizzRepository {
   async findOne(id: string): Promise<Option<Quizz>> {
     const quizz = await this.quizzRepository
       .createQueryBuilder("quizz")
-      .innerJoinAndMapMany(
-        "quizz.question",
+      .leftJoinAndMapMany(
+        "quizz.questions",
         QuestionEntity,
         "question",
         "quizz.id = question.quizzId"
       )
-      .innerJoinAndMapMany(
+      .leftJoinAndMapMany(
         "question.alternatives",
         AlternativeEntity,
         "alternatives",
         "question.id = alternatives.questionId"
       )
-      .where("quizz.id = :id", { id }) // or you can change condition to 'key.userId = :userId' because of you have `userId` in Key
+      .where("quizz.id = :id", { id })
       .getOne();
-    return Option.fromNullable<Quizz>(
-      this.quizzEntityMapper.entityToApi(quizz)
-    );
+    return quizz
+      ? Option.Some<Quizz>(this.quizzEntityMapper.entityToApi(quizz))
+      : Option.None<Quizz>();
   }
 
   /**
@@ -54,19 +54,24 @@ export class PsqlQuizzRepository extends QuizzRepository {
    * @returns all the quizz
    */
   async findAll(params: QuizzParams = DefaultQuizzParams): Promise<Quizz[]> {
-    const queryBuilder = this.quizzRepository.createQueryBuilder("quizz");
+    const queryBuilder = this.quizzRepository
+      .createQueryBuilder("quizz")
+      .leftJoinAndMapMany(
+        "quizz.questions",
+        QuestionEntity,
+        "question",
+        "quizz.id = question.quizzId"
+      );
     this.quizzFilter.buildFilters(queryBuilder, params);
     this.quizzFilter.buildPaginationAndSort(queryBuilder, params);
 
     const result = await queryBuilder.getMany();
-
     return this.quizzEntityMapper.entitiesToApis(result);
   }
 
   /**
    * Create a Quizz into the database.
-   * @param dto quizz dto
-   * @param userId the quizz owner id
+   * @param quizz quizz
    * @returns the fresh entity
    */
   async save(quizz: Quizz): Promise<Result<Quizz, Error>> {
@@ -89,5 +94,16 @@ export class PsqlQuizzRepository extends QuizzRepository {
     const result = this.quizzRepository.delete(id);
     Result.fromPromise(result);
     return Result.fromExecution(() => result);
+  }
+
+  /**
+   * Count the number of quizz
+   * @param params
+   * @returns
+   */
+  async count(params: QuizzParams = DefaultQuizzParams): Promise<number> {
+    const queryBuilder = this.quizzRepository.createQueryBuilder("quizz");
+    this.quizzFilter.buildFilters(queryBuilder, params);
+    return queryBuilder.getCount();
   }
 }

@@ -3,7 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Option, Result } from "@swan-io/boxed";
 import { AttemptRepository } from "../../../domain/ports/repositories/attempt.repository";
-import { Attempt } from "../../../domain/entities/attempt.entity";
+import { Attempt } from "../../../domain/models/attempt.model";
 import { AttemptEntityMapper } from "../mappers/attempt.mapper";
 import { AttemptEntity } from "./entities/attempt.entity";
 import { AttemptFilter } from "../filters/attempt.filter";
@@ -13,7 +13,7 @@ import { AttemptParams, DefaultAttemptParams } from "../params/attempt.param";
 export class PsqlAttemptRepository extends AttemptRepository {
   constructor(
     @InjectRepository(AttemptEntity)
-    readonly AttemptRepository: Repository<AttemptEntity>,
+    readonly attemptRepository: Repository<AttemptEntity>,
     private readonly attemptEntityMapper: AttemptEntityMapper,
     private readonly attemptFilter: AttemptFilter
   ) {
@@ -28,7 +28,7 @@ export class PsqlAttemptRepository extends AttemptRepository {
   async findOne(id: string): Promise<Option<Attempt>> {
     return Option.fromNullable<Attempt>(
       this.attemptEntityMapper.entityToApi(
-        await this.AttemptRepository.findOne(id)
+        await this.attemptRepository.findOne(id)
       )
     );
   }
@@ -40,7 +40,7 @@ export class PsqlAttemptRepository extends AttemptRepository {
   async findAll(
     params: AttemptParams = DefaultAttemptParams
   ): Promise<Attempt[]> {
-    const queryBuilder = this.AttemptRepository.createQueryBuilder("quizz");
+    const queryBuilder = this.attemptRepository.createQueryBuilder("attempt");
     this.attemptFilter.buildFilters(queryBuilder, params);
     this.attemptFilter.buildPaginationAndSort(queryBuilder, params);
 
@@ -58,10 +58,21 @@ export class PsqlAttemptRepository extends AttemptRepository {
   async save(Attempt: Attempt): Promise<Result<Attempt, Error>> {
     return Result.Ok(
       this.attemptEntityMapper.entityToApi(
-        await this.AttemptRepository.save(
+        await this.attemptRepository.save(
           this.attemptEntityMapper.apiToEntity(Attempt)
         )
       )
     );
+  }
+
+  /**
+   * Count the number of attempts
+   * @param params
+   * @returns
+   */
+  async count(params: AttemptParams = DefaultAttemptParams): Promise<number> {
+    const queryBuilder = this.attemptRepository.createQueryBuilder("attempt");
+    this.attemptFilter.buildFilters(queryBuilder, params);
+    return queryBuilder.getCount();
   }
 }

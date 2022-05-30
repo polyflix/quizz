@@ -35,7 +35,7 @@ export class QuizzController {
   }
 
   @Put(":id")
-  completeOne(@Param("id") id: string, @Body() updateQuizzDto: UpdateQuizzDTO) {
+  update(@Param("id") id: string, @Body() updateQuizzDto: UpdateQuizzDTO) {
     return this.quizzService.update(id, updateQuizzDto, "");
   }
 

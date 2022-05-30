@@ -1,6 +1,6 @@
 import { Option, Result } from "@swan-io/boxed";
 import { QuizzParams } from "../../../infrastructure/adapters/params/quizz.param";
-import { Quizz } from "../../entities/quizz.entity";
+import { Quizz } from "../../models/quizz.model";
 
 export abstract class QuizzRepository {
   abstract findAll(params: QuizzParams): Promise<Quizz[]>;

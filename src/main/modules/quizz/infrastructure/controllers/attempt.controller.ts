@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, Post, Query } from "@nestjs/common";
-import { CreateAttemptDto } from "../../application/dto/create-attempt.dto";
+import { CreateAttemptDto } from "../../application/dto/attempt.dto";
 import { AttemptParams } from "../adapters/params/attempt.param";
 import { AttemptService } from "../services/attempt.service";
 
