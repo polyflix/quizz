@@ -26,7 +26,10 @@ export class AttemptService {
    * @param id id of the quizz attempts asked
    * @returns the attempts
    */
-  async findOne(id: string): Promise<Attempt> {
+  async findOne(
+    id: string,
+    user: { userId: string; isAdmin: boolean }
+  ): Promise<Attempt> {
     const attempt = await this.attemptRepository.findOne(id);
 
     return attempt.match({
@@ -42,9 +45,10 @@ export class AttemptService {
    * @returns all the attempts
    */
   async find(
-    params: AttemptParams = DefaultAttemptParams
+    params: AttemptParams = DefaultAttemptParams,
+    user: { userId: string; isAdmin: boolean }
   ): Promise<AttemptResponse> {
-    const quizz = await this.quizzService.findOne(params.quizzId, false);
+    const quizz = await this.quizzService.findOne(params.quizzId, user, false);
     if (!quizz) {
       throw new NotFoundException("Quizz not found");
     }
@@ -69,11 +73,11 @@ export class AttemptService {
   async create(
     dto: CreateAttemptDto,
     quizzId: string,
-    userId: string
+    user: { userId: string; isAdmin: boolean }
   ): Promise<Attempt> {
-    const quizz = await this.quizzService.findOne(quizzId, true);
+    const quizz = await this.quizzService.findOne(quizzId, user, true);
 
-    if (dto.user.id !== userId) {
+    if (dto.user.id !== user.userId) {
       return Promise.reject(
         new UnauthorizedException("User ID provided don't match your user ID")
       );

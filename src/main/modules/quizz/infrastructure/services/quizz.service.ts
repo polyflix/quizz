@@ -26,7 +26,11 @@ export class QuizzService {
    * @param id id of the quizz asked
    * @returns the focused quizz
    */
-  async findOne(id: string, solved = false): Promise<Quizz> {
+  async findOne(
+    id: string,
+    user: { userId: string; isAdmin: boolean },
+    solved = false
+  ): Promise<Quizz> {
     const quizz = await this.quizzRepository.findOne(id);
     return quizz.match({
       Some: (value: Quizz) => (solved ? value : this.removeSolutions(value)),
@@ -40,7 +44,10 @@ export class QuizzService {
    * Find all quizz
    * @returns all the quizz
    */
-  async find(params: QuizzParams = DefaultQuizzParams): Promise<QuizzResponse> {
+  async find(
+    params: QuizzParams = DefaultQuizzParams,
+    user: { userId: string; isAdmin: boolean }
+  ): Promise<QuizzResponse> {
     const quizzes = await this.quizzRepository.findAll(params);
     const totalQuizzes = await this.quizzRepository.count(params);
     return {
@@ -58,8 +65,8 @@ export class QuizzService {
    * @param userId the quizz owner id
    * @returns the fresh entity
    */
-  async create(dto: CreateQuizzDTO, userId: string): Promise<Quizz> {
-    if (dto.user.id !== userId) {
+  async create(dto: CreateQuizzDTO, user: { userId: string }): Promise<Quizz> {
+    if (dto.user.id !== user.userId) {
       return Promise.reject(
         new UnauthorizedException("User ID provided don't match your user ID")
       );
@@ -85,11 +92,15 @@ export class QuizzService {
   async update(
     id: string,
     dto: UpdateQuizzDTO,
-    userId: string
+    user: { userId: string; isAdmin: boolean }
   ): Promise<Quizz> {
     // Get the entity and check if the user is the creator of the resource
     const focusedQuizz = await this.quizzRepository.findOne(id);
-    if (focusedQuizz.isSome() && focusedQuizz.value.user.id !== userId) {
+
+    if (
+      focusedQuizz.isSome() &&
+      (focusedQuizz.value.user.id !== user.userId || !user.isAdmin)
+    ) {
       return Promise.reject(
         new UnauthorizedException("You are not the owner of this quizz")
       );
@@ -112,7 +123,7 @@ export class QuizzService {
    * @param userId should be the id of the user who created the quizz
    * @returns
    */
-  async delete(id: string, userId: string) {
+  async delete(id: string, user: { userId: string; isAdmin: boolean }) {
     // Get the entity and check if the user is the creator of the resource
     let focusedQuizz;
     try {
@@ -121,7 +132,10 @@ export class QuizzService {
       return new UnprocessableEntityException();
     }
 
-    if (focusedQuizz.isSome() && focusedQuizz.value.user.id !== userId) {
+    if (
+      focusedQuizz.isSome() &&
+      (focusedQuizz.value.user.id !== user.userId || !user.isAdmin)
+    ) {
       return Promise.reject(
         new UnauthorizedException("You are not the owner of this quizz")
       );
