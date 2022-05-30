@@ -6,11 +6,14 @@ telemetry:
   host: localhost
 
 kafka:
+  topics:
+    quizz: polyflix.quizz
+
   client:
-    clientId: todo-backend
-    brokers: localhost:9092
+    clientId: quizz-backend
+    brokers: localhost:29092
   consumer:
-    groupId: todo-consumer
+    groupId: quizz-consumer
     allowAutoTopicCreation: true
 
 database:

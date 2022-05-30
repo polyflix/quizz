@@ -4,6 +4,13 @@ import {
   UnauthorizedException,
   UnprocessableEntityException
 } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { ClientKafka } from "@nestjs/microservices";
+import {
+  InjectKafkaClient,
+  PolyflixKafkaMessage,
+  TriggerType
+} from "@polyflix/x-utils";
 import {
   CreateQuizzDTO,
   UpdateQuizzDTO
@@ -19,7 +26,16 @@ import { PsqlQuizzRepository } from "../adapters/repositories/psql-quizz.reposit
 
 @Injectable()
 export class QuizzService {
-  constructor(readonly quizzRepository: PsqlQuizzRepository) {}
+  private KAFKA_QUIZZ_TOPIC: string;
+
+  constructor(
+    readonly quizzRepository: PsqlQuizzRepository,
+    private readonly configService: ConfigService,
+    @InjectKafkaClient() private readonly kafkaClient: ClientKafka
+  ) {
+    this.KAFKA_QUIZZ_TOPIC =
+      this.configService.get<string>("kafka.topics.quizz");
+  }
 
   /**
    * Find a specific Quizz
@@ -66,16 +82,28 @@ export class QuizzService {
    * @returns the fresh entity
    */
   async create(dto: CreateQuizzDTO, user: { userId: string }): Promise<Quizz> {
-    if (dto.user.id !== user.userId) {
-      return Promise.reject(
-        new UnauthorizedException("User ID provided don't match your user ID")
-      );
-    }
+    // if (dto.user.id !== user.userId) {
+    //   return Promise.reject(
+    //     new UnauthorizedException("User ID provided don't match your user ID")
+    //   );
+    // }
 
     const quizz = await this.quizzRepository.save(Quizz.create(dto));
 
     return quizz.match({
-      Ok: (value: Quizz) => value,
+      Ok: (value: Quizz) => {
+        this.kafkaClient.emit<string, PolyflixKafkaMessage>(
+          this.KAFKA_QUIZZ_TOPIC,
+          {
+            key: value.id,
+            value: {
+              trigger: TriggerType.CREATE,
+              payload: value
+            }
+          }
+        );
+        return value;
+      },
       Error: () => {
         throw new UnprocessableEntityException("Quizz not created");
       }
@@ -110,7 +138,19 @@ export class QuizzService {
       Quizz.create({ id, ...focusedQuizz.value, ...dto })
     );
     return quizz.match({
-      Ok: (value: Quizz) => value,
+      Ok: (value: Quizz) => {
+        this.kafkaClient.emit<string, PolyflixKafkaMessage>(
+          this.KAFKA_QUIZZ_TOPIC,
+          {
+            key: value.id,
+            value: {
+              trigger: TriggerType.UPDATE,
+              payload: value
+            }
+          }
+        );
+        return value;
+      },
       Error: () => {
         throw new UnprocessableEntityException("Quizz not updated");
       }
@@ -142,6 +182,18 @@ export class QuizzService {
     }
 
     const response = this.quizzRepository.remove(id);
+
+    this.kafkaClient.emit<string, PolyflixKafkaMessage>(
+      this.KAFKA_QUIZZ_TOPIC,
+      {
+        key: focusedQuizz.id,
+        value: {
+          trigger: TriggerType.DELETE,
+          payload: focusedQuizz
+        }
+      }
+    );
+
     return { response: { statusCode: response.tag } };
   }
 
