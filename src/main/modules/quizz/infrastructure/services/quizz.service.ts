@@ -82,11 +82,11 @@ export class QuizzService {
    * @returns the fresh entity
    */
   async create(dto: CreateQuizzDTO, user: { userId: string }): Promise<Quizz> {
-    // if (dto.user.id !== user.userId) {
-    //   return Promise.reject(
-    //     new UnauthorizedException("User ID provided don't match your user ID")
-    //   );
-    // }
+    if (dto.user.id !== user.userId) {
+      return Promise.reject(
+        new UnauthorizedException("User ID provided don't match your user ID")
+      );
+    }
 
     const quizz = await this.quizzRepository.save(Quizz.create(dto));
 
@@ -180,6 +180,8 @@ export class QuizzService {
         new UnauthorizedException("You are not the owner of this quizz")
       );
     }
+
+    focusedQuizz = focusedQuizz.value;
 
     const response = this.quizzRepository.remove(id);
 
