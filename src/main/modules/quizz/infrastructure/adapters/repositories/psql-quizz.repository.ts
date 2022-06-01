@@ -75,6 +75,7 @@ export class PsqlQuizzRepository extends QuizzRepository {
    * @returns the fresh entity
    */
   async save(quizz: Quizz): Promise<Result<Quizz, Error>> {
+    this.logger.log(`Creating quizz ${quizz.name}`);
     return Result.Ok(
       this.quizzEntityMapper.entityToApi(
         await this.quizzRepository.save(
@@ -91,6 +92,8 @@ export class PsqlQuizzRepository extends QuizzRepository {
    * @returns
    */
   remove(id: string): Result<unknown, Error> {
+    this.logger.log(`Deleting quizz with id ${id}`);
+
     const result = this.quizzRepository.delete(id);
     Result.fromPromise(result);
     return Result.fromExecution(() => result);
@@ -102,6 +105,8 @@ export class PsqlQuizzRepository extends QuizzRepository {
    * @returns
    */
   async count(params: QuizzParams = DefaultQuizzParams): Promise<number> {
+    this.logger.log(`Counting quizzes availables`);
+
     const queryBuilder = this.quizzRepository.createQueryBuilder("quizz");
     this.quizzFilter.buildFilters(queryBuilder, params);
     return queryBuilder.getCount();

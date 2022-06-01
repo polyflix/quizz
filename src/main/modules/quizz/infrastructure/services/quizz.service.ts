@@ -1,5 +1,6 @@
 import {
   Injectable,
+  Logger,
   NotFoundException,
   UnauthorizedException,
   UnprocessableEntityException
@@ -27,6 +28,7 @@ import { PsqlQuizzRepository } from "../adapters/repositories/psql-quizz.reposit
 @Injectable()
 export class QuizzService {
   private KAFKA_QUIZZ_TOPIC: string;
+  protected readonly logger = new Logger(QuizzService.name);
 
   constructor(
     readonly quizzRepository: PsqlQuizzRepository,
@@ -47,7 +49,13 @@ export class QuizzService {
     user: { userId: string; isAdmin: boolean },
     solved = false
   ): Promise<Quizz> {
+    this.logger.debug(`Searching for quizz with id ${id}`);
+
     const quizz = await this.quizzRepository.findOne(id);
+    quizz.isSome()
+      ? this.logger.debug(`Quizz found by id`)
+      : this.logger.debug(`Quizz not found by id`);
+
     return quizz.match({
       Some: (value: Quizz) => (solved ? value : this.removeSolutions(value)),
       None: () => {
@@ -64,6 +72,8 @@ export class QuizzService {
     params: QuizzParams = DefaultQuizzParams,
     user: { userId: string; isAdmin: boolean }
   ): Promise<QuizzResponse> {
+    this.logger.debug(`Searching for all quizzes`);
+
     const quizzes = await this.quizzRepository.findAll(params);
     const totalQuizzes = await this.quizzRepository.count(params);
     return {
@@ -82,7 +92,13 @@ export class QuizzService {
    * @returns the fresh entity
    */
   async create(dto: CreateQuizzDTO, user: { userId: string }): Promise<Quizz> {
+    this.logger.debug(`Handled quizz creation request for quizz ${dto.name}`);
+
     if (dto.user.id !== user.userId) {
+      this.logger.debug(
+        `Rejected quizz creation request for quizz ${dto.name} and user ${dto.user.id}`
+      );
+
       return Promise.reject(
         new UnauthorizedException("User ID provided don't match your user ID")
       );
@@ -91,6 +107,7 @@ export class QuizzService {
 
     return quizz.match({
       Ok: (value: Quizz) => {
+        this.logger.debug(`Created quizz ${value.name}`);
         this.kafkaClient.emit<string, PolyflixKafkaMessage>(
           this.KAFKA_QUIZZ_TOPIC,
           {
@@ -121,13 +138,21 @@ export class QuizzService {
     dto: UpdateQuizzDTO,
     user: { userId: string; isAdmin: boolean }
   ): Promise<Quizz> {
+    this.logger.debug(`Handled quizz update request for quizz ${dto.name}`);
+
     // Get the entity and check if the user is the creator of the resource
     const focusedQuizz = await this.quizzRepository.findOne(id);
+    focusedQuizz.isSome()
+      ? this.logger.debug(`Succefully found existing quizz named ${dto.name}`)
+      : this.logger.debug(`Cannot find the specified quizz named ${dto.name}`);
 
     if (
       focusedQuizz.isSome() &&
       (focusedQuizz.value.user.id !== user.userId || !user.isAdmin)
     ) {
+      this.logger.debug(
+        `Rejected quizz update request for quizz ${dto.name} and user ${dto.user.id}`
+      );
       return Promise.reject(
         new UnauthorizedException("You are not the owner of this quizz")
       );
@@ -138,6 +163,7 @@ export class QuizzService {
     );
     return quizz.match({
       Ok: (value: Quizz) => {
+        this.logger.debug(`Created quizz ${dto.name}`);
         this.kafkaClient.emit<string, PolyflixKafkaMessage>(
           this.KAFKA_QUIZZ_TOPIC,
           {
@@ -168,6 +194,9 @@ export class QuizzService {
     try {
       focusedQuizz = await this.quizzRepository.findOne(id);
     } catch {
+      this.logger.debug(
+        `Cannot found quizz corresponding to the specified id ${id}`
+      );
       return new UnprocessableEntityException();
     }
 
@@ -175,6 +204,9 @@ export class QuizzService {
       focusedQuizz.isSome() &&
       (focusedQuizz.value.user.id !== user.userId || !user.isAdmin)
     ) {
+      this.logger.debug(
+        `Rejected quizz deletion request for quizz with id ${id} and user with id ${user.userId}`
+      );
       return Promise.reject(
         new UnauthorizedException("You are not the owner of this quizz")
       );
@@ -183,6 +215,8 @@ export class QuizzService {
     focusedQuizz = focusedQuizz.value;
 
     const response = this.quizzRepository.remove(id);
+
+    this.logger.debug(`Deleted quizz ${focusedQuizz.name}`);
 
     this.kafkaClient.emit<string, PolyflixKafkaMessage>(
       this.KAFKA_QUIZZ_TOPIC,
@@ -204,6 +238,7 @@ export class QuizzService {
    * @returns quizz
    */
   removeSolutions(quizz: Quizz): Quizz {
+    this.logger.debug(`Removing answers solutions for quizz ${quizz.name}`);
     quizz.data.questions.forEach((question) => {
       question.alternatives.forEach((alternative) => {
         delete alternative.isCorrect;
@@ -218,6 +253,7 @@ export class QuizzService {
   computeScore(quizz: Quizz, answers: QuizzAnswers): number {
     let score = 0;
     let malus = 0;
+    this.logger.debug(`Computing score for quizz ${quizz.name}`);
 
     Object.entries(answers).forEach(([questionId, questionAnswers]) => {
       const { alternatives } = quizz.data.questions.find(

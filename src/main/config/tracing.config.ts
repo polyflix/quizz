@@ -34,7 +34,7 @@ export const configureOTel = (
 
   return new NodeSDK({
     resource: new Resource({
-      [SemanticResourceAttributes.SERVICE_NAME]: "boilerplate",
+      [SemanticResourceAttributes.SERVICE_NAME]: "quiz",
       [SemanticResourceAttributes.TELEMETRY_SDK_LANGUAGE]:
         TelemetrySdkLanguageValues.NODEJS
     }),
