@@ -7,6 +7,8 @@ export class QuizzEntityMapper extends AbstractMapper<QuizzEntity, Quizz> {
     const entity = new QuizzEntity();
     Object.assign(entity, apiModel);
 
+    entity.keepHighestScore = apiModel.data.keepHighestScore;
+    entity.allowedRetries = apiModel.data.allowedRetries;
     entity.questions = apiModel.data.questions;
     entity.user_id = apiModel.user.id;
     entity.user_lastName = apiModel.user.lastName;

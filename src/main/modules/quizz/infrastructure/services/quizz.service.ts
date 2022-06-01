@@ -87,7 +87,6 @@ export class QuizzService {
         new UnauthorizedException("User ID provided don't match your user ID")
       );
     }
-
     const quizz = await this.quizzRepository.save(Quizz.create(dto));
 
     return quizz.match({
@@ -219,8 +218,6 @@ export class QuizzService {
   computeScore(quizz: Quizz, answers: QuizzAnswers): number {
     let score = 0;
     let malus = 0;
-
-    quizz.data.questions.forEach((q) => console.log(q));
 
     Object.entries(answers).forEach(([questionId, questionAnswers]) => {
       const { alternatives } = quizz.data.questions.find(
