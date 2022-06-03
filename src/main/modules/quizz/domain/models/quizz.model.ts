@@ -3,6 +3,7 @@ import { Default } from "./default.model";
 import { QuizzInvalidError } from "../errors/quizz-invalid.error";
 import { Result } from "@swan-io/boxed";
 import { User } from "./user.model";
+import { Visibility } from "../../infrastructure/adapters/repositories/entities/quizz.entity";
 
 export class QuizzProps extends Default {
   name: string;
@@ -11,6 +12,7 @@ export class QuizzProps extends Default {
   questions: Question[];
   user: User;
   draft: boolean;
+  visibility: Visibility;
 }
 
 export class Quizz {
@@ -23,12 +25,12 @@ export class Quizz {
     },
     public user: User,
     public draft: boolean = false,
+    public visibility: Visibility,
     public id: string,
     public createdAt: Date,
     public updatedAt: Date,
     public __v: number,
-    public type: string = "quizz",
-    public visibility: string = "public"
+    public type: string = "quizz"
   ) {}
 
   static create(props: QuizzProps): Quizz {
@@ -41,6 +43,7 @@ export class Quizz {
       },
       props.user,
       props.draft,
+      props.visibility,
       props.id,
       props.createdAt,
       props.updatedAt,

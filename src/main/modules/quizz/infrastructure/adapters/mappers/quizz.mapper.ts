@@ -11,9 +11,9 @@ export class QuizzEntityMapper extends AbstractMapper<QuizzEntity, Quizz> {
     entity.allowedRetries = apiModel.data.allowedRetries;
     entity.questions = apiModel.data.questions;
     entity.user_id = apiModel.user.id;
-    entity.user_lastName = apiModel.user.lastName;
-    entity.user_firstName = apiModel.user.firstName;
-    entity.user_avatar = apiModel.user.avatar;
+    entity.user.lastName = apiModel.user.lastName;
+    entity.user.firstName = apiModel.user.firstName;
+    entity.user.avatar = apiModel.user.avatar;
 
     return entity;
   }
@@ -26,10 +26,11 @@ export class QuizzEntityMapper extends AbstractMapper<QuizzEntity, Quizz> {
       questions: entity.questions,
       user: {
         id: entity.user_id,
-        lastName: entity.user_lastName,
-        firstName: entity.user_firstName,
-        avatar: entity.user_avatar
+        lastName: entity.user.lastName,
+        firstName: entity.user.firstName,
+        avatar: entity.user.avatar
       },
+      visibility: entity.visibility,
       draft: entity.draft,
       id: entity.id,
       createdAt: entity.createdAt,

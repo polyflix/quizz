@@ -19,7 +19,7 @@ kafka:
 database:
   psql:
     # In case you want to use an URL instead
-    # url: postgres://sa_video:sa_video_pwd@localhost:5433/video
+    # url: postgres://sa_quizz:sa_quizz_pwd@localhost:5433/quizz
     host: localhost
     port: 5433
     username: sa_quizz

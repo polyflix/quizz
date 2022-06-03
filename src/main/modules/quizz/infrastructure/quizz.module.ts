@@ -16,29 +16,43 @@ import { AttemptRepository } from "../domain/ports/repositories/attempt.reposito
 import { PsqlAttemptRepository } from "./adapters/repositories/psql-attempt.repository";
 import { AttemptFilter } from "./adapters/filters/attempt.filter";
 import { AttemptEntityMapper } from "./adapters/mappers/attempt.mapper";
+import { UserEntity } from "./adapters/repositories/entities/user.entity";
+import { UserService } from "./services/user.service";
+import { UserController } from "./controllers/user.controller";
+import {
+  UserApiMapper,
+  UserEntityMapper
+} from "./adapters/mappers/user.mapper";
+import { UserRepository } from "../domain/ports/repositories/user.repository";
+import { PsqlUserRepository } from "./adapters/repositories/psql-user.repository";
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       QuizzEntity,
+      UserEntity,
       AlternativeEntity,
       QuestionEntity,
       AttemptEntity
     ])
   ],
-  controllers: [QuizzController, AttemptController],
+  controllers: [QuizzController, AttemptController, UserController],
   providers: [
     QuizzService,
     AttemptService,
     PsqlQuizzRepository,
     PsqlAttemptRepository,
+    UserService,
     QuizzFilter,
     AttemptFilter,
     QuizzEntityMapper,
     AttemptEntityMapper,
+    UserEntityMapper,
+    UserApiMapper,
     { provide: QuizzRepository, useClass: PsqlQuizzRepository },
-    { provide: AttemptRepository, useClass: PsqlAttemptRepository }
+    { provide: AttemptRepository, useClass: PsqlAttemptRepository },
+    { provide: UserRepository, useClass: PsqlUserRepository }
   ],
-  exports: [QuizzService, AttemptService]
+  exports: [QuizzService, AttemptService, UserService]
 })
 export class QuizzModule {}

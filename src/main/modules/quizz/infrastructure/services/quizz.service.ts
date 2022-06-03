@@ -103,6 +103,7 @@ export class QuizzService {
         new UnauthorizedException("User ID provided don't match your user ID")
       );
     }
+
     const quizz = await this.quizzRepository.save(Quizz.create(dto));
 
     return quizz.match({
