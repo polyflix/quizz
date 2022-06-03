@@ -40,7 +40,13 @@ export class PsqlAttemptRepository extends AttemptRepository {
   async findAll(
     params: AttemptParams = DefaultAttemptParams
   ): Promise<Attempt[]> {
-    const queryBuilder = this.attemptRepository.createQueryBuilder("attempt");
+    const queryBuilder = this.attemptRepository
+      .createQueryBuilder("attempt")
+      .leftJoinAndSelect(
+        "attempt.user",
+        "user",
+        "attempt.userId = user.userId"
+      );
     this.attemptFilter.buildFilters(queryBuilder, params);
     this.attemptFilter.buildPaginationAndSort(queryBuilder, params);
 

@@ -17,24 +17,30 @@ interface PolyflixCustomKafkaValue extends PolyflixKafkaValue {
 export class UserController {
   private readonly logger = new Logger(UserController.name);
 
-  constructor(
-    @InjectKafkaClient() private readonly kafkaClient: ClientKafka,
-    private readonly userService: UserService
-  ) {}
+  constructor(private readonly userService: UserService) {}
 
-  @EventPattern("polyflix.legacy.user")
+  @EventPattern("polyflix.user")
   async process(@Payload("value") message: PolyflixCustomKafkaValue) {
-    const payload = message.fields;
+    // const payload = message.fields;
+    // console.log("event")
     this.logger.log(
-      `Receive message from topic: polyflix.legacy.user - trigger: ${message.trigger}`
+      `Receive message from topic: polyflix.user - trigger: ${message.trigger}`
     );
-    const user: UserDto = Object.assign(new UserDto(), payload);
+
+    const userDto: UserDto = {
+      id: message.payload?.id,
+      avatar: message.payload?.avatar,
+      firstName: message.payload?.firstName,
+      lastName: message.payload?.lastName
+    };
+
+    // const user: UserDto = Object.assign(new UserDto(), payload);
     switch (message.trigger) {
       case TriggerType.UPDATE:
-        await this.userService.update(user);
+        await this.userService.update(userDto);
         break;
       case TriggerType.CREATE:
-        await this.userService.create(user);
+        await this.userService.create(userDto);
         break;
     }
   }

@@ -39,11 +39,11 @@ export class QuizzEntity extends DefaultEntity {
   visibility?: Visibility;
 
   @Column("uuid")
-  user_id?: string;
+  userId?: string;
 
   @ManyToOne(() => UserEntity, (user) => user.userId, {
     eager: true
   })
-  @JoinColumn({ name: "user_id" })
+  @JoinColumn({ name: "userId" })
   user?: UserEntity;
 }

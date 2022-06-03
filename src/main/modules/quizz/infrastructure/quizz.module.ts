@@ -53,6 +53,13 @@ import { PsqlUserRepository } from "./adapters/repositories/psql-user.repository
     { provide: AttemptRepository, useClass: PsqlAttemptRepository },
     { provide: UserRepository, useClass: PsqlUserRepository }
   ],
-  exports: [QuizzService, AttemptService, UserService]
+  exports: [
+    QuizzService,
+    AttemptService,
+    UserService,
+    UserEntityMapper,
+    UserApiMapper,
+    QuizzEntityMapper
+  ]
 })
 export class QuizzModule {}

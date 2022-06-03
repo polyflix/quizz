@@ -1,18 +1,22 @@
+import { Injectable } from "@nestjs/common";
 import { AbstractMapper } from "src/main/core/helpers/abstract.mapper";
 import { Attempt, AttemptProps } from "../../../domain/models/attempt.model";
 import { AttemptEntity } from "../repositories/entities/attempt.entity";
+import { UserEntityMapper } from "./user.mapper";
 
+@Injectable()
 export class AttemptEntityMapper extends AbstractMapper<
   AttemptEntity,
   Attempt
 > {
+  constructor(private readonly userEntityMapper: UserEntityMapper) {
+    super();
+  }
   apiToEntity(apiModel: Attempt): AttemptEntity {
     const entity = new AttemptEntity();
     Object.assign(entity, apiModel);
-    entity.user_id = apiModel.user.id;
-    entity.user_lastName = apiModel.user.lastName;
-    entity.user_firstName = apiModel.user.firstName;
-    entity.user_avatar = apiModel.user.avatar;
+    entity.user = this.userEntityMapper.apiToEntity(apiModel.user);
+
     return entity;
   }
 
@@ -22,12 +26,7 @@ export class AttemptEntityMapper extends AbstractMapper<
       quizzId: entity.quizzId,
       score: entity.score,
       answers: entity.answers,
-      user: {
-        id: entity.user_id,
-        lastName: entity.user_lastName,
-        firstName: entity.user_firstName,
-        avatar: entity.user_avatar
-      },
+      user: this.userEntityMapper.entityToApi(entity.user),
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
       __v: entity.__v

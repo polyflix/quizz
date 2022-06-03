@@ -93,7 +93,6 @@ export class QuizzService {
    */
   async create(dto: CreateQuizzDTO, user: { userId: string }): Promise<Quizz> {
     this.logger.debug(`Handled quizz creation request for quizz ${dto.name}`);
-
     if (dto.user.id !== user.userId) {
       this.logger.debug(
         `Rejected quizz creation request for quizz ${dto.name} and user ${dto.user.id}`
@@ -148,8 +147,8 @@ export class QuizzService {
       : this.logger.debug(`Cannot find the specified quizz named ${dto.name}`);
 
     if (
-      focusedQuizz.isSome() &&
-      (focusedQuizz.value.user.id !== user.userId || !user.isAdmin)
+      focusedQuizz.isNone() ||
+      (focusedQuizz.value.user.id !== user.userId && !user.isAdmin)
     ) {
       this.logger.debug(
         `Rejected quizz update request for quizz ${dto.name} and user ${dto.user.id}`
@@ -162,6 +161,7 @@ export class QuizzService {
     const quizz = await this.quizzRepository.save(
       Quizz.create({ id, ...focusedQuizz.value, ...dto })
     );
+
     return quizz.match({
       Ok: (value: Quizz) => {
         this.logger.debug(`Created quizz ${dto.name}`);
@@ -202,8 +202,8 @@ export class QuizzService {
     }
 
     if (
-      focusedQuizz.isSome() &&
-      (focusedQuizz.value.user.id !== user.userId || !user.isAdmin)
+      focusedQuizz.isNone() ||
+      (focusedQuizz.value.user.id !== user.userId && !user.isAdmin)
     ) {
       this.logger.debug(
         `Rejected quizz deletion request for quizz with id ${id} and user with id ${user.userId}`

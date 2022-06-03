@@ -1,7 +1,8 @@
 import { Exclude } from "class-transformer";
 import { IsString } from "class-validator";
-import { Column, Entity } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
 import { DefaultEntity } from "./default.entity";
+import { UserEntity } from "./user.entity";
 
 export interface QuizzAnswersEntity {
   [questionId: string]: string[];
@@ -19,19 +20,12 @@ export class AttemptEntity extends DefaultEntity {
   @Exclude()
   quizzId?: string;
 
-  @IsString()
-  @Column()
-  user_id: string;
+  @Column("uuid")
+  userId?: string;
 
-  @IsString()
-  @Column()
-  user_firstName: string;
-
-  @IsString()
-  @Column()
-  user_lastName: string;
-
-  @IsString()
-  @Column()
-  user_avatar: string;
+  @ManyToOne(() => UserEntity, (user) => user.userId, {
+    eager: true
+  })
+  @JoinColumn({ name: "userId" })
+  user?: UserEntity;
 }

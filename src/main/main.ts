@@ -1,5 +1,6 @@
 import { ValidationPipe, VersioningType } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
+import { kafkaConfig } from "@polyflix/x-utils";
 import { AppModule } from "./app.module";
 import { ISLOCAL, loadConfiguration } from "./config/loader.config";
 import { logger } from "./config/logger.config";
@@ -31,6 +32,7 @@ async function bootstrap() {
   app.enableShutdownHooks();
 
   const port = config["server"]["port"] || 3000;
+  app.connectMicroservice(kafkaConfig(config["kafka"]));
   if (!ISLOCAL) {
     app.startAllMicroservices();
   } else {

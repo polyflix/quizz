@@ -30,6 +30,7 @@ export class PsqlQuizzRepository extends QuizzRepository {
   async findOne(id: string): Promise<Option<Quizz>> {
     const quizz = await this.quizzRepository
       .createQueryBuilder("quizz")
+      .leftJoinAndSelect("quizz.user", "user", "quizz.userId = user.userId")
       .leftJoinAndMapMany(
         "quizz.questions",
         QuestionEntity,
@@ -56,6 +57,7 @@ export class PsqlQuizzRepository extends QuizzRepository {
   async findAll(params: QuizzParams = DefaultQuizzParams): Promise<Quizz[]> {
     const queryBuilder = this.quizzRepository
       .createQueryBuilder("quizz")
+      .leftJoinAndSelect("quizz.user", "user", "quizz.userId = user.userId")
       .leftJoinAndMapMany(
         "quizz.questions",
         QuestionEntity,
@@ -76,13 +78,11 @@ export class PsqlQuizzRepository extends QuizzRepository {
    */
   async save(quizz: Quizz): Promise<Result<Quizz, Error>> {
     this.logger.log(`Creating quizz ${quizz.name}`);
-    return Result.Ok(
-      this.quizzEntityMapper.entityToApi(
-        await this.quizzRepository.save(
-          this.quizzEntityMapper.apiToEntity(quizz)
-        )
-      )
-    );
+    const entity = this.quizzEntityMapper.apiToEntity(quizz);
+
+    const res = await this.quizzRepository.save(entity);
+
+    return Result.Ok(this.quizzEntityMapper.entityToApi(res));
   }
 
   /**

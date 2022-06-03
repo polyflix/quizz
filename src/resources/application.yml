@@ -8,7 +8,7 @@ telemetry:
 kafka:
   topics:
     quizz: polyflix.quiz
-
+    user: polyflix.user
   client:
     clientId: quizz-backend
     brokers: localhost:29092
