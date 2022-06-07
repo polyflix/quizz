@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseBoolPipe,
   Post,
   Put,
   Query
@@ -15,6 +16,8 @@ import {
 import { QuizzParams } from "../adapters/params/quizz.param";
 import { QuizzService } from "../services/quizz.service";
 import { IsAdmin, MeId } from "@polyflix/x-utils";
+import { isBoolean } from "class-validator";
+import { query } from "express";
 
 @Controller("quizzes")
 export class QuizzController {

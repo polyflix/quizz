@@ -1,4 +1,5 @@
-import { IsBoolean, IsEnum, IsOptional, IsString } from "class-validator";
+import { IsBoolean, IsOptional, IsString, IsEnum } from "class-validator";
+import { ToBoolean } from "src/main/core/types/dto.type";
 import { Pagination } from "../../../../../core/types/pagination.type";
 import { Visibility } from "../repositories/entities/quizz.entity";
 
@@ -15,6 +16,7 @@ export class QuizzParams extends Pagination {
   visibility?: Visibility;
 
   @IsBoolean()
+  @ToBoolean()
   @IsOptional()
   draft: boolean;
 
@@ -25,4 +27,9 @@ export class QuizzParams extends Pagination {
   @IsOptional()
   @IsString()
   name?: string;
+
+  @IsOptional()
+  @ToBoolean()
+  @IsBoolean()
+  isDone?: boolean;
 }

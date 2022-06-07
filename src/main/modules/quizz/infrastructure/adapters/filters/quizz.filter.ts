@@ -4,6 +4,7 @@ import { SelectQueryBuilder } from "typeorm";
 import { AbstractFilter, SortingTypeEnum } from "./abstract.filter";
 import { QuizzParams } from "../params/quizz.param";
 import { QuizzEntity } from "../repositories/entities/quizz.entity";
+import { AttemptEntity } from "../repositories/entities/attempt.entity";
 
 @Injectable()
 export class QuizzFilter extends AbstractFilter<QuizzEntity> {
@@ -16,9 +17,16 @@ export class QuizzFilter extends AbstractFilter<QuizzEntity> {
     }
 
     if (has(params, "userId")) {
-      queryBuilder.andWhere("quizz.userId = :userId", {
+      queryBuilder.andWhere("quizz.user_id = :userId", {
         userId: params.userId
       });
+      if (has(params, "isDone")) {
+        queryBuilder.innerJoinAndSelect(
+          AttemptEntity,
+          "attempt",
+          "quizz.id = attempt.quizzId"
+        );
+      }
     }
 
     if (has(params, "draft")) {
