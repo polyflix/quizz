@@ -6,8 +6,8 @@ import { Visibility } from "../repositories/entities/quizz.entity";
 export const DefaultQuizzParams: QuizzParams = {
   page: 1,
   pageSize: 10,
-  draft: false
-  // visibility: Visibility.PUBLIC
+  draft: false,
+  visibility: Visibility.PUBLIC
 };
 
 export class QuizzParams extends Pagination {
