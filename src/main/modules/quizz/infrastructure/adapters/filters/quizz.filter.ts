@@ -17,7 +17,7 @@ export class QuizzFilter extends AbstractFilter<QuizzEntity> {
     }
 
     if (has(params, "userId")) {
-      queryBuilder.andWhere("quizz.user_id = :userId", {
+      queryBuilder.andWhere("quizz.userId = :userId", {
         userId: params.userId
       });
       if (has(params, "isDone")) {
@@ -35,11 +35,11 @@ export class QuizzFilter extends AbstractFilter<QuizzEntity> {
       });
     }
 
-    // if (has(params, "visibility")) {
-    //   queryBuilder.andWhere("quizz.visibility = :visibility", {
-    //     visibility
-    //   });
-    // }
+    if (has(params, "visibility")) {
+      queryBuilder.andWhere("quizz.visibility = :visibility", {
+        visibility: params.visibility
+      });
+    }
   }
 
   buildPaginationAndSort(

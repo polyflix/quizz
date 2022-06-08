@@ -9,10 +9,11 @@ import { InjectKafkaClient } from "./core/decorators/kafka-inject.decorator";
 
 @Injectable()
 export class AppService
-  implements OnApplicationBootstrap, OnApplicationShutdown {
+  implements OnApplicationBootstrap, OnApplicationShutdown
+{
   private readonly logger = new Logger(AppService.name);
 
-  constructor(@InjectKafkaClient() private readonly kafkaClient: ClientProxy) { }
+  constructor(@InjectKafkaClient() private readonly kafkaClient: ClientProxy) {}
 
   async onApplicationBootstrap() {
     // if (ISLOCAL) {
