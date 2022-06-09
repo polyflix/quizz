@@ -1,9 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { has } from "lodash";
 import { SelectQueryBuilder } from "typeorm";
-import { AbstractFilter, SortingTypeEnum } from "./abstract.filter";
+import { AbstractFilter } from "./abstract.filter";
 import { QuizzParams } from "../params/quizz.param";
-import { QuizzEntity } from "../repositories/entities/quizz.entity";
+import { QuizzEntity, Visibility } from "../repositories/entities/quizz.entity";
 import { AttemptEntity } from "../repositories/entities/attempt.entity";
 
 @Injectable()
@@ -30,15 +30,24 @@ export class QuizzFilter extends AbstractFilter<QuizzEntity> {
     }
 
     if (has(params, "draft")) {
-      queryBuilder.andWhere("quizz.draft = :draft", {
-        draft: params.draft
-      });
+      if (params.draft == false) {
+        queryBuilder.andWhere("quizz.draft = :draft", {
+          draft: params.draft
+        });
+      }
     }
 
     if (has(params, "visibility")) {
-      queryBuilder.andWhere("quizz.visibility = :visibility", {
-        visibility: params.visibility
-      });
+      if (params.visibility === Visibility.PUBLIC) {
+        queryBuilder.andWhere("quizz.visibility = :visibility", {
+          visibility: Visibility.PUBLIC
+        });
+      }
+      if (params.visibility === Visibility.PROTECTED) {
+        queryBuilder.andWhere("quizz.visibility != :visibility", {
+          visibility: Visibility.PRIVATE
+        });
+      }
     }
   }
 
@@ -47,16 +56,6 @@ export class QuizzFilter extends AbstractFilter<QuizzEntity> {
     params: QuizzParams
   ): void {
     this.paginate(queryBuilder, params.page, params.pageSize);
-
-    if (has(params, "order")) {
-      const cleanedOrder = params.order?.startsWith("-")
-        ? params.order?.substring(1)
-        : params.order;
-      const ordering =
-        params.order.substring(0, 1).replace(/\s/g, "") === "-"
-          ? SortingTypeEnum.DESC
-          : SortingTypeEnum.ASC;
-    }
 
     this.order(
       "quizz",

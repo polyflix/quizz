@@ -23,6 +23,7 @@ import {
   DefaultQuizzParams,
   QuizzParams
 } from "../adapters/params/quizz.param";
+import { Visibility } from "../adapters/repositories/entities/quizz.entity";
 import { PsqlQuizzRepository } from "../adapters/repositories/psql-quizz.repository";
 
 @Injectable()
@@ -73,6 +74,8 @@ export class QuizzService {
     user: { userId: string; isAdmin: boolean }
   ): Promise<QuizzResponse> {
     this.logger.debug(`Searching for all quizzes`);
+
+    params = this.validateParams(params, user);
 
     const quizzes = await this.quizzRepository.findAll(params);
     const totalQuizzes = await this.quizzRepository.count(params);
@@ -280,5 +283,33 @@ export class QuizzService {
     });
 
     return score - malus;
+  }
+
+  /**
+   * Validate the params asked by the User
+   * @param params the params
+   * @param user the user
+   * @returns the validated params
+   */
+  validateParams(
+    params: QuizzParams,
+    user: { userId: string; isAdmin: boolean }
+  ): QuizzParams {
+    this.logger.debug(`Validating params for quizz`);
+
+    // Admin can use all by default
+    if (user.isAdmin) return params;
+    if (params.userId !== user.userId) {
+      // User can see other draft params
+      params.draft = false;
+
+      // User can't see other private quizz
+      params.visibility =
+        params.visibility == Visibility.PRIVATE
+          ? Visibility.PUBLIC
+          : params.visibility;
+    }
+
+    return params;
   }
 }
