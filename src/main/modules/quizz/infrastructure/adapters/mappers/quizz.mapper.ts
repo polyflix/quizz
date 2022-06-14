@@ -40,6 +40,7 @@ export class QuizzEntityMapper extends AbstractMapper<QuizzEntity, Quizz> {
       visibility: entity.visibility,
       draft: entity.draft,
       id: entity.id,
+      questions_count: entity.questions_count,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
       __v: entity.__v

@@ -46,4 +46,6 @@ export class QuizzEntity extends DefaultEntity {
   })
   @JoinColumn({ name: "userId" })
   user?: UserEntity;
+
+  questions_count?: number;
 }

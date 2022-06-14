@@ -58,7 +58,11 @@ export class PsqlQuizzRepository extends QuizzRepository {
     const queryBuilder = this.quizzRepository
       .createQueryBuilder("quizz")
       .leftJoinAndSelect("quizz.user", "user", "quizz.userId = user.userId")
-      .leftJoinAndSelect("quizz.questions", "question");
+      .loadRelationCountAndMap(
+        "quizz.questions_count",
+        "quizz.questions",
+        "questions_count"
+      );
     this.quizzFilter.buildFilters(queryBuilder, params);
     this.quizzFilter.buildPaginationAndSort(queryBuilder, params);
 

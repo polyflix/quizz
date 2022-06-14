@@ -13,6 +13,7 @@ export class QuizzProps extends Default {
   user: User;
   draft: boolean;
   visibility: Visibility;
+  questions_count?: number;
 }
 
 export class Quizz {
@@ -22,6 +23,7 @@ export class Quizz {
       keepHighestScore: boolean;
       allowedRetries: number;
       questions: Question[];
+      questions_count: number;
     },
     public user: User,
     public draft: boolean = false,
@@ -39,7 +41,8 @@ export class Quizz {
       {
         keepHighestScore: props.keepHighestScore,
         allowedRetries: props.allowedRetries,
-        questions: props.questions
+        questions: props.questions,
+        questions_count: props.questions_count
       },
       props.user,
       props.draft,
