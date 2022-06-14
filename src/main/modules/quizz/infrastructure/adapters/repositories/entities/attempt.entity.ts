@@ -1,5 +1,3 @@
-import { Exclude } from "class-transformer";
-import { IsString } from "class-validator";
 import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
 import { DefaultEntity } from "./default.entity";
 import { UserEntity } from "./user.entity";
@@ -17,7 +15,6 @@ export class AttemptEntity extends DefaultEntity {
   answers: QuizzAnswersEntity;
 
   @Column("uuid")
-  @Exclude()
   quizzId?: string;
 
   @Column("uuid")

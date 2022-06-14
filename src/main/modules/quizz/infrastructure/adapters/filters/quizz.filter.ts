@@ -17,15 +17,19 @@ export class QuizzFilter extends AbstractFilter<QuizzEntity> {
     }
 
     if (has(params, "userId")) {
-      queryBuilder.andWhere("quizz.userId = :userId", {
-        userId: params.userId
-      });
       if (has(params, "isDone")) {
         queryBuilder.innerJoinAndSelect(
           AttemptEntity,
           "attempt",
           "quizz.id = attempt.quizzId"
         );
+        queryBuilder.andWhere("attempt.userId = :userId", {
+          userId: params.userId
+        });
+      } else {
+        queryBuilder.andWhere("quizz.userId = :userId", {
+          userId: params.userId
+        });
       }
     }
 
