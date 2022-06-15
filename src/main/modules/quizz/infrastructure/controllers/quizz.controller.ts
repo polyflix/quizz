@@ -31,11 +31,12 @@ export class QuizzController {
 
   @Get(":id")
   findOne(
+    @Query("solved") solved: boolean,
     @Param("id") id: string,
     @MeId() userId: string,
     @IsAdmin() isAdmin: boolean
   ) {
-    return this.quizzService.findOne(id, { userId, isAdmin });
+    return this.quizzService.findOne(id, { userId, isAdmin }, solved);
   }
 
   @Post()

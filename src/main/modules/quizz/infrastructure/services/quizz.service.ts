@@ -57,6 +57,22 @@ export class QuizzService {
       ? this.logger.debug(`Quizz found by id`)
       : this.logger.debug(`Quizz not found by id`);
 
+    if (
+      quizz.isNone() ||
+      (quizz.value.user.id !== user.userId && !user.isAdmin)
+    ) {
+      solved = false;
+    }
+
+    if (
+      quizz.isSome() &&
+      quizz.value.visibility === Visibility.PRIVATE &&
+      quizz.value.user.id !== user.userId &&
+      !user.isAdmin
+    ) {
+      throw new UnauthorizedException("You can't access this private quizz");
+    }
+
     return quizz.match({
       Some: (value: Quizz) => (solved ? value : this.removeSolutions(value)),
       None: () => {
