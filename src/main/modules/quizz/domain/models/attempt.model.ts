@@ -19,7 +19,9 @@ export class Attempt {
     public answers: QuizzAnswers,
     public user: User,
     public quizzId: string,
-    public id?: string
+    public id?: string,
+    public createdAt?: Date,
+    public updatedAt?: Date
   ) {}
 
   static create(props: AttemptProps): Attempt {
@@ -27,7 +29,10 @@ export class Attempt {
       props.score,
       props.answers,
       props.user,
-      props.quizzId
+      props.quizzId,
+      props.id,
+      props.createdAt ? new Date(props.createdAt) : undefined,
+      props.updatedAt ? new Date(props.updatedAt) : undefined
     );
 
     return attempt.validate().match({
