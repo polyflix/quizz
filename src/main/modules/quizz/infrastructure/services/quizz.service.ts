@@ -67,7 +67,8 @@ export class QuizzService {
 
     if (
       quizz.isSome() &&
-      quizz.value.visibility === Visibility.PRIVATE &&
+      (quizz.value.visibility === Visibility.PRIVATE ||
+        quizz.value.draft === true) &&
       quizz.value.user.id !== user.userId &&
       !user.isAdmin
     ) {
