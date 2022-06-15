@@ -1,4 +1,5 @@
 import {
+  ForbiddenException,
   Injectable,
   Logger,
   NotFoundException,
@@ -70,7 +71,7 @@ export class QuizzService {
       quizz.value.user.id !== user.userId &&
       !user.isAdmin
     ) {
-      throw new UnauthorizedException("You can't access this private quizz");
+      throw new ForbiddenException("You can't access this private quizz");
     }
 
     return quizz.match({
