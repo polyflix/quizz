@@ -49,7 +49,8 @@ export class QuizzService {
   async findOne(
     id: string,
     user: { userId: string; isAdmin: boolean },
-    solved = false
+    solved = false,
+    getResponse = false
   ): Promise<Quizz> {
     this.logger.debug(`Searching for quizz with id ${id}`);
 
@@ -60,9 +61,11 @@ export class QuizzService {
 
     if (
       quizz.isNone() ||
-      (quizz.value.user.id !== user.userId && !user.isAdmin)
+      (getResponse && quizz.value.user.id !== user.userId && !user.isAdmin)
     ) {
       solved = false;
+    } else {
+      solved = true;
     }
 
     if (
