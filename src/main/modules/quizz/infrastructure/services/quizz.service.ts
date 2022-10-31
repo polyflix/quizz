@@ -55,21 +55,14 @@ export class QuizzService {
     this.logger.debug(`Searching for quizz with id ${id}`);
 
     const quizz = await this.quizzRepository.findOne(id);
-    quizz.isSome()
-      ? this.logger.debug(`Quizz found by id`)
-      : this.logger.debug(`Quizz not found by id`);
-
-    if (
-      quizz.isNone() ||
-      (getResponse && quizz.value.user.id !== user.userId && !user.isAdmin)
-    ) {
-      solved = false;
-    } else {
-      solved = true;
+    if (quizz.isNone()) {
+      throw new NotFoundException("Quizz not found");
     }
 
+    solved =
+      getResponse && (quizz.value.user.id == user.userId || user.isAdmin);
+
     if (
-      quizz.isSome() &&
       (quizz.value.visibility === Visibility.PRIVATE ||
         quizz.value.draft === true) &&
       quizz.value.user.id !== user.userId &&
